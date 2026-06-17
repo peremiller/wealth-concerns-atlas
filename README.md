@@ -41,3 +41,5 @@ vercel --prod          # deploy
 `public/data.json` holds the full rated dataset. Regenerate it from the source `millionaire-solutions` parts if ratings change.
 
 > Ratings are directional editorial judgments, not personalized financial, legal, or security advice.
+
+<!-- deployed via GitHub auto-deploy -->
