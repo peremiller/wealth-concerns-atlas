@@ -40,7 +40,7 @@ export function useUrlState() {
   const [state, setState] = useState(() => ({ ...DEFAULT, ...parse() }))
 
   useEffect(() => {
-    const onHash = () => setState(s => ({ ...DEFAULT, ...parse() }))
+    const onHash = () => setState(() => ({ ...DEFAULT, ...parse() }))
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
