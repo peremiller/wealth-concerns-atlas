@@ -37,6 +37,21 @@ vercel --prod          # deploy
 
 **Git / Dashboard** — push to GitHub and import the repo at vercel.com; it auto-detects Vite (build `vite build`, output `dist`). No env vars needed.
 
+## Development workflow (preview before promoting)
+`main` is the production branch — it auto-deploys to the live domains. Never commit directly to it. Instead:
+
+1. **Branch**: `git checkout -b feat/my-change`
+2. **Push & open a PR** to `main`: `git push -u origin feat/my-change` then `gh pr create`
+3. **CI runs** automatically (`.github/workflows/ci.yml` → lint + build). The PR can't be merged until it passes.
+4. **Preview deploy**: Vercel builds a unique preview URL for the PR and posts it as a check/comment — open it to review the change live (preview deployments are login-gated).
+5. **Promote**: merge the PR → `main` auto-deploys to production.
+
+Run the same checks locally before pushing:
+```bash
+npm run lint
+npm run build
+```
+
 ## Data
 `public/data.json` holds the full rated dataset. Regenerate it from the source `millionaire-solutions` parts if ratings change.
 
