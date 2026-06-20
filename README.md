@@ -56,6 +56,10 @@ npm run lint
 npm run build
 ```
 
+## Automated maintenance
+- **Dependabot** opens weekly grouped dependency PRs (npm + GitHub Actions).
+- **Auto-merge** (`.github/workflows/dependabot-automerge.yml`): patch and minor Dependabot PRs are set to auto-merge — they merge themselves once the `build` check passes. Major version bumps are left for manual review.
+
 ## Data
 `public/data.json` holds the full rated dataset. Regenerate it from the source `millionaire-solutions` parts if ratings change.
 
