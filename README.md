@@ -1,6 +1,10 @@
 # Wealth Concerns Atlas
 
+[![CI](https://github.com/peremiller/wealth-concerns-atlas/actions/workflows/ci.yml/badge.svg)](https://github.com/peremiller/wealth-concerns-atlas/actions/workflows/ci.yml)
+
 Interactive explorer of the topmost concerns of millionaires, billionaires, and the apex tier — **24 concerns × 120 rated solutions = 2,880 total**. Built with React + Vite.
+
+**Live:** [wealthconcerns.vercel.app](https://wealthconcerns.vercel.app)
 
 ## Features
 - **Dashboard** — metric cards + interactive quick-wins bar chart (click a bar to drill in) + tier breakdown + top opportunities.
