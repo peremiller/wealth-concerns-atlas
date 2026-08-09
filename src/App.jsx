@@ -30,7 +30,7 @@ export default function App() {
       <header className="topbar">
         <div className="wrap topbar-inner">
           <div className="brand">
-            <span className="logo">◆</span>
+            <span className="logo"><img src="/favicon.svg" alt="" aria-hidden="true" /></span>
             <div>
               <h1>Wealth Concerns Atlas</h1>
               <p className="tagline">24 concerns · 2,880 rated solutions · millionaires → apex tier</p>
