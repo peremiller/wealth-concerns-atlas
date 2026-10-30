@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/offline/build.mjs --dir dist --name \"Wealth Concerns Atlas\" --spa",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:offline": "node --test scripts/offline/offline.test.mjs scripts/offline/client.test.mjs"
   },
   "dependencies": {
     "chart.js": "^4.4.1",
