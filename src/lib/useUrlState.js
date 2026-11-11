@@ -9,11 +9,13 @@ const DEFAULT = {
   compare: [],
 }
 
+const VALID_VIEWS = new Set(['dashboard', 'explore', 'compare', 'about'])
+
 function parse() {
   const h = new URLSearchParams(window.location.hash.slice(1))
   const list = k => (h.get(k) ? h.get(k).split(',').filter(Boolean) : [])
   return {
-    view: h.get('view') || DEFAULT.view,
+    view: VALID_VIEWS.has(h.get('view')) ? h.get('view') : DEFAULT.view,
     q: h.get('q') || '',
     tiers: list('tiers'), pri: list('pri'), eff: list('eff'), cost: list('cost'),
     qwOnly: h.get('qw') === '1',
@@ -42,13 +44,18 @@ export function useUrlState() {
   useEffect(() => {
     const onHash = () => setState(() => ({ ...DEFAULT, ...parse() }))
     window.addEventListener('hashchange', onHash)
-    return () => window.removeEventListener('hashchange', onHash)
+    window.addEventListener('popstate', onHash)
+    return () => {
+      window.removeEventListener('hashchange', onHash)
+      window.removeEventListener('popstate', onHash)
+    }
   }, [])
 
   useEffect(() => {
     const next = serialize(state)
     if (next !== window.location.hash.slice(1)) {
-      window.history.replaceState(null, '', next ? `#${next}` : `${window.location.pathname}`)
+      const base = `${window.location.pathname}${window.location.search}`
+      window.history.replaceState(null, '', next ? `${base}#${next}` : base)
     }
   }, [state])
 
@@ -56,9 +63,21 @@ export function useUrlState() {
     setState(s => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) }))
   }, [])
 
+  // Section navigation should create one recoverable browser-history entry.
+  // Search and filter edits still use replaceState to avoid history spam.
+  const navigate = useCallback(patch => {
+    const nextState = { ...state, ...patch }
+    const nextHash = serialize(nextState)
+    if (nextHash !== window.location.hash.slice(1)) {
+      const base = `${window.location.pathname}${window.location.search}`
+      window.history.pushState(null, '', nextHash ? `${base}#${nextHash}` : base)
+    }
+    setState(nextState)
+  }, [state])
+
   const reset = useCallback(() => {
     setState(s => ({ ...DEFAULT, view: s.view }))
   }, [])
 
-  return [state, update, reset]
+  return [state, update, reset, navigate]
 }
