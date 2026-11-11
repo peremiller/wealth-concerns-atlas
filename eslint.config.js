@@ -4,7 +4,10 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist', 'node_modules'] },
+  // These two sources are substitution templates, not executable JavaScript until
+  // scripts/offline/build.mjs injects CONFIG. Lint the remaining app code and
+  // validate the generated offline scripts after the build in CI.
+  { ignores: ['dist', 'node_modules', 'scripts/offline/client.js', 'scripts/offline/worker.js'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
