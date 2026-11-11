@@ -136,7 +136,8 @@ mark{background:rgba(191,143,0,.28);color:inherit;border-radius:3px;padding:0 1p
 @media(max-width:760px){
   .explore{grid-template-columns:1fr}
   .filters{position:static}
-  .tabs{order:3;width:100%;justify-content:center}
+  .tabs{order:3;width:100%;justify-content:center;flex-wrap:wrap}
+  .tabs .tab{flex:1 1 calc(50% - 4px);min-width:0;padding-inline:10px}
   .chart-wrap{height:680px}
 }
 
