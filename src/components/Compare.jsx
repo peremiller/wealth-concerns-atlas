@@ -1,4 +1,5 @@
 import { TIERCOL, TIERLABEL, PMAP } from '../lib/data.js'
+import { updateCompareSlot } from '../lib/compareState.js'
 
 function Picker({ data, value, onChange, exclude, label }) {
   return (
@@ -48,8 +49,8 @@ function Column({ data, id, onChange, other, label }) {
 
 export default function Compare({ data, state, update }) {
   const [a, b] = state.compare
-  const setA = v => update(s => ({ compare: [v, s.compare[1] || ''].filter(Boolean) }))
-  const setB = v => update(s => ({ compare: [s.compare[0] || '', v].filter(Boolean) }))
+  const setA = v => update(s => ({ compare: updateCompareSlot(s.compare, 0, v) }))
+  const setB = v => update(s => ({ compare: updateCompareSlot(s.compare, 1, v) }))
 
   return (
     <div className="view">
