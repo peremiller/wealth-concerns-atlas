@@ -7,7 +7,7 @@ const EFF_OPTS = ['Low', 'Medium', 'High']
 const COST_OPTS = ['$', '$$', '$$$']
 
 function Chip({ on, onClick, children, className = '' }) {
-  return <button className={`chip ${className}${on ? ' on' : ''}`} onClick={onClick}>{children}</button>
+  return <button type="button" className={`chip ${className}${on ? ' on' : ''}`} aria-pressed={on} onClick={onClick}>{children}</button>
 }
 
 function toggle(arr, v) { return arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v] }
@@ -54,7 +54,7 @@ export default function Explore({ data, state, update, reset }) {
   return (
     <div className="explore">
       <aside className="filters">
-        <input className="search" type="search" placeholder="Search 2,880 solutions…"
+        <input className="search" type="search" aria-label="Search solutions" placeholder="Search 2,880 solutions…"
           value={state.q} onChange={e => update({ q: e.target.value })} />
 
         <FilterGroup title="Tier">
@@ -93,13 +93,13 @@ export default function Explore({ data, state, update, reset }) {
           const open = state.open.includes(p.id)
           return (
             <div className={'problem' + (open ? ' open' : '')} key={p.id}>
-              <div className="phead" onClick={() => setOpen(p.id)}>
+              <button type="button" className="phead" aria-expanded={open} aria-controls={`concern-body-${p.id}`} onClick={() => setOpen(p.id)}>
                 <span className="tierbadge" style={{ background: TIERCOL[p.t] }}>{p.t}</span>
                 <span className="ptitle">{p.id} · {p.title}</span>
                 <span className="pmeta">{n} shown · {p.qw}★</span>
-                <span className="chev">▶</span>
-              </div>
-              <div className="pbody">
+                <span className="chev" aria-hidden="true">▶</span>
+              </button>
+              <div className="pbody" id={`concern-body-${p.id}`}>
                 {cats.map(cat => (
                   <div className="catblock" key={cat.category}>
                     <h4>{cat.category}</h4>
