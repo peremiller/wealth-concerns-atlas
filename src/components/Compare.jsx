@@ -1,8 +1,8 @@
 import { TIERCOL, TIERLABEL, PMAP } from '../lib/data.js'
 
-function Picker({ data, value, onChange, exclude }) {
+function Picker({ data, value, onChange, exclude, label }) {
   return (
-    <select className="cmp-select" value={value || ''} onChange={e => onChange(e.target.value)}>
+    <select className="cmp-select" aria-label={label} value={value || ''} onChange={e => onChange(e.target.value)}>
       <option value="">Choose a concern…</option>
       {data.problems.filter(p => p.id !== exclude).map(p => (
         <option key={p.id} value={p.id}>{p.id} · {p.title}</option>
@@ -11,11 +11,11 @@ function Picker({ data, value, onChange, exclude }) {
   )
 }
 
-function Column({ data, id, onChange, other }) {
+function Column({ data, id, onChange, other, label }) {
   const p = data.problems.find(x => x.id === id)
   return (
     <div className="cmp-col">
-      <Picker data={data} value={id} onChange={onChange} exclude={other} />
+      <Picker data={data} value={id} onChange={onChange} exclude={other} label={label} />
       {p && (
         <div className="cmp-card">
           <div className="cmp-head" style={{ borderTopColor: TIERCOL[p.t] }}>
@@ -55,8 +55,8 @@ export default function Compare({ data, state, update }) {
     <div className="view">
       <div className="section-title"><span>Compare two concerns side by side</span><span className="dim">top 10 each · shareable via URL</span></div>
       <div className="cmp-grid">
-        <Column data={data} id={a} onChange={setA} other={b} />
-        <Column data={data} id={b} onChange={setB} other={a} />
+        <Column data={data} id={a} onChange={setA} other={b} label="First concern" />
+        <Column data={data} id={b} onChange={setB} other={a} label="Second concern" />
       </div>
       {!a && !b && <p className="empty">Pick two concerns above to compare their highest-leverage solutions.</p>}
     </div>
