@@ -30,23 +30,23 @@ try {
       const errors = []
       page.on('pageerror', error => errors.push(error.message))
 
-      await page.goto(origin + '/#view=compare&cmp=M01%2CB02', { waitUntil: 'domcontentloaded' })
+      await page.goto(origin + '/#view=compare&cmp=M1%2CB2', { waitUntil: 'domcontentloaded' })
       await page.getByRole('combobox', { name: 'First concern' }).waitFor()
       const first = page.getByRole('combobox', { name: 'First concern' })
       const second = page.getByRole('combobox', { name: 'Second concern' })
-      assert.equal(await first.inputValue(), 'M01')
-      assert.equal(await second.inputValue(), 'B02')
+      assert.equal(await first.inputValue(), 'M1')
+      assert.equal(await second.inputValue(), 'B2')
       assert.equal(await page.getByRole('button', { name: 'Compare' }).getAttribute('aria-current'), 'page')
 
       // Regression: clearing first comparison column must not move second into first.
       await first.selectOption('')
       assert.equal(await first.inputValue(), '')
-      assert.equal(await second.inputValue(), 'B02')
-      assert.equal(new URLSearchParams(new URL(page.url()).hash.slice(1)).get('cmp'), ',B02')
+      assert.equal(await second.inputValue(), 'B2')
+      assert.equal(new URLSearchParams(new URL(page.url()).hash.slice(1)).get('cmp'), ',B2')
       await page.reload({ waitUntil: 'domcontentloaded' })
       await page.getByRole('combobox', { name: 'Second concern' }).waitFor()
       assert.equal(await page.getByRole('combobox', { name: 'First concern' }).inputValue(), '')
-      assert.equal(await page.getByRole('combobox', { name: 'Second concern' }).inputValue(), 'B02')
+      assert.equal(await page.getByRole('combobox', { name: 'Second concern' }).inputValue(), 'B2')
 
       await page.getByRole('button', { name: 'Explore' }).hover()
       await page.getByRole('button', { name: 'Explore' }).click()
@@ -54,7 +54,7 @@ try {
       await page.goBack({ waitUntil: 'domcontentloaded' })
       await page.getByRole('combobox', { name: 'Second concern' }).waitFor()
       assert.equal(new URLSearchParams(new URL(page.url()).hash.slice(1)).get('view'), 'compare')
-      assert.equal(await page.getByRole('combobox', { name: 'Second concern' }).inputValue(), 'B02')
+      assert.equal(await page.getByRole('combobox', { name: 'Second concern' }).inputValue(), 'B2')
 
       // A user-selected theme must persist without changing existing URL state.
       const toggle = page.getByRole('button', { name: 'Switch to dark theme' })
