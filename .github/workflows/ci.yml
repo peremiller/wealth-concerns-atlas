@@ -26,3 +26,9 @@ jobs:
         run: npm run build
       - name: Validate generated offline scripts
         run: node --check dist/offline-client.js && node --check dist/offline-sw.js
+      - name: Install isolated Playwright browser harness
+        run: npm install --no-save --package-lock=false playwright@1.56.1
+      - name: Install Chromium on supported runner
+        run: npx playwright install --with-deps chromium
+      - name: Test responsive keyboard, URL history, theme, comparison and errors in actual Chromium
+        run: node tests/ui-browser-smoke.mjs
