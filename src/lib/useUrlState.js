@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { parseCompare, serializeCompare } from './compareState.js'
 
 const DEFAULT = {
   view: 'dashboard',
@@ -20,7 +21,7 @@ function parse() {
     tiers: list('tiers'), pri: list('pri'), eff: list('eff'), cost: list('cost'),
     qwOnly: h.get('qw') === '1',
     open: list('open'),
-    compare: list('cmp'),
+    compare: parseCompare(h.get('cmp')),
   }
 }
 
@@ -34,7 +35,8 @@ function serialize(s) {
   if (s.cost.length) h.set('cost', s.cost.join(','))
   if (s.qwOnly) h.set('qw', '1')
   if (s.open.length) h.set('open', s.open.join(','))
-  if (s.compare.length) h.set('cmp', s.compare.join(','))
+  const comparison = serializeCompare(s.compare)
+  if (comparison !== null) h.set('cmp', comparison)
   return h.toString()
 }
 
