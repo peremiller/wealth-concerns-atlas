@@ -76,8 +76,14 @@ try {
 
   // Error state must be perceivable to assistive technology; no customer data involved.
   const broken = await browser.newContext({ viewport: { width: 390, height: 860 } })
-  await broken.route('**/data.json', route => route.fulfill({ status: 503, contentType: 'text/plain', body: 'Unavailable' }))
-  await broken.route('**/*', route => new URL(route.request().url()).origin === origin ? route.continue() : route.abort())
+  await broken.route('**/*', route => {
+    const url = new URL(route.request().url())
+    if (url.origin !== origin) return route.abort()
+    if (url.pathname.endsWith('/data.json')) {
+      return route.fulfill({ status: 503, contentType: 'text/plain', body: 'Unavailable' })
+    }
+    return route.continue()
+  })
   const errorPage = await broken.newPage()
   await errorPage.goto(origin, { waitUntil: 'domcontentloaded' })
   await errorPage.getByRole('alert').waitFor()
