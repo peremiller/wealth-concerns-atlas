@@ -41,16 +41,17 @@ test('light and dark theme tokens meet normal-text contrast for informative labe
   const { readFileSync } = await import('node:fs')
   const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
   const themes = {
-    light: css.match(/:root\\s*\\{([^}]+)\\}/)?.[1],
-    dark: css.match(/\\[data-theme="dark"\\]\\s*\\{([^}]+)\\}/)?.[1],
+    light: css.match(/:root\s*\{([^}]+)\}/)?.[1],
+    dark: css.match(/\[data-theme="dark"\]\s*\{([^}]+)\}/)?.[1],
   }
   const channel = value => {
     const normalized = value / 255
     return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4
   }
   const luminance = hex => {
-    assert.match(hex, /^#[0-9a-f]{6}$/i)
-    const channels = [1, 3, 5].map(i => channel(parseInt(hex.slice(i, i + 2), 16)))
+    assert.match(hex, /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i)
+    const expanded = hex.length === 4 ? '#' + [...hex.slice(1)].map(digit => digit + digit).join('') : hex
+    const channels = [1, 3, 5].map(i => channel(parseInt(expanded.slice(i, i + 2), 16)))
     return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
   }
   const contrast = (a, b) => {
@@ -64,7 +65,7 @@ test('light and dark theme tokens meet normal-text contrast for informative labe
   ]
   for (const [theme, block] of Object.entries(themes)) {
     assert.ok(block, theme + ' theme variables exist')
-    const tokens = Object.fromEntries([...block.matchAll(/--([a-z-]+):\\s*(#[0-9a-f]{6})\\s*(?:;|$)/gi)]
+    const tokens = Object.fromEntries([...block.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{3}(?:[0-9a-f]{3})?)\s*(?:;|$)/gi)]
       .map(([, name, value]) => [name, value]))
     for (const [foreground, background] of pairs) {
       assert.ok(tokens[foreground] && tokens[background], theme + ' has ' + foreground + ' and ' + background)
