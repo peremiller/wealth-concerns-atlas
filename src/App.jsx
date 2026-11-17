@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useData } from './lib/data.js'
 import { useUrlState } from './lib/useUrlState.js'
+import { loadTheme, saveTheme } from './lib/themeStorage.js'
 import Dashboard from './components/Dashboard.jsx'
 import Explore from './components/Explore.jsx'
 import Compare from './components/Compare.jsx'
@@ -16,11 +17,11 @@ const VIEWS = [
 export default function App() {
   const { data, error } = useData()
   const [state, update, reset, navigate] = useUrlState()
-  const [theme, setTheme] = useState(() => localStorage.getItem('wc-theme') || 'light')
+  const [theme, setTheme] = useState(loadTheme)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('wc-theme', theme)
+    saveTheme(theme)
   }, [theme])
 
   const setView = view => navigate({ view })
