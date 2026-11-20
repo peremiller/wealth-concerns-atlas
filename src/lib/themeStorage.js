@@ -11,7 +11,9 @@ export function loadTheme(storageProvider = () => globalThis.localStorage) {
 
 export function saveTheme(theme, storageProvider = () => globalThis.localStorage) {
   try {
-    storageProvider()?.setItem(THEME_KEY, theme === 'dark' ? 'dark' : 'light')
+    const storage = storageProvider()
+    if (!storage || typeof storage.setItem !== 'function') return false
+    storage.setItem(THEME_KEY, theme === 'dark' ? 'dark' : 'light')
     return true
   } catch {
     // Preserve the active in-memory theme when persistence is unavailable.
