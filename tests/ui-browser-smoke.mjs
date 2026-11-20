@@ -51,6 +51,16 @@ try {
       await page.getByRole('button', { name: 'Explore' }).hover()
       await page.getByRole('button', { name: 'Explore' }).click()
       assert.equal(new URLSearchParams(new URL(page.url()).hash.slice(1)).get('view'), 'explore')
+      // Distinguish repeated filter labels by their actual accessible group.
+      const priorityGroup = page.getByRole('group', { name: 'Priority' })
+      const effortGroup = page.getByRole('group', { name: 'Effort' })
+      const priorityHigh = priorityGroup.getByRole('button', { name: 'High' })
+      assert.equal(await priorityHigh.getAttribute('aria-pressed'), 'false')
+      assert.equal(await effortGroup.getByRole('button', { name: 'High' }).getAttribute('aria-pressed'), 'false')
+      await priorityHigh.focus()
+      await page.keyboard.press('Enter')
+      assert.equal(await priorityHigh.getAttribute('aria-pressed'), 'true')
+      assert.equal(await effortGroup.getByRole('button', { name: 'High' }).getAttribute('aria-pressed'), 'false')
       await page.goBack({ waitUntil: 'domcontentloaded' })
       await page.getByRole('combobox', { name: 'Second concern' }).waitFor()
       assert.equal(new URLSearchParams(new URL(page.url()).hash.slice(1)).get('view'), 'compare')
@@ -90,6 +100,41 @@ try {
   assert.match(await errorPage.getByRole('alert').textContent(), /Could not load data/)
   await broken.close()
   console.log('PASS real Chromium: data-loading failure announced as alert')
+
+  // Denied browser storage must not blank the app or prevent in-memory theme changes.
+  // Test the real generated React bundle, not only a unit-level storage mock.
+  for (const width of [320, 1280]) {
+    const restricted = await browser.newContext({ viewport: { width, height: 860 }, colorScheme: 'dark' })
+    await restricted.route('**/*', route => {
+      if (new URL(route.request().url()).origin === origin) return route.continue()
+      return route.abort()
+    })
+    await restricted.addInitScript(() => {
+      Object.defineProperty(window, 'localStorage', {
+        configurable: true,
+        get() { throw new DOMException('Browser storage denied', 'SecurityError') },
+      })
+    })
+    const restrictedPage = await restricted.newPage()
+    const storageErrors = []
+    restrictedPage.on('pageerror', error => storageErrors.push(error.message))
+    await restrictedPage.goto(origin + '/#view=compare&cmp=M1%2CB2', { waitUntil: 'domcontentloaded' })
+    await restrictedPage.getByRole('combobox', { name: 'Second concern' }).waitFor()
+    assert.equal(await restrictedPage.locator('html').getAttribute('data-theme'), 'light')
+    assert.equal(await restrictedPage.getByRole('combobox', { name: 'Second concern' }).inputValue(), 'B2')
+    const toggle = restrictedPage.getByRole('button', { name: 'Switch to dark theme' })
+    await toggle.focus()
+    await restrictedPage.keyboard.press('Enter')
+    assert.equal(await restrictedPage.locator('html').getAttribute('data-theme'), 'dark')
+    assert.equal(await restrictedPage.getByRole('button', { name: 'Switch to light theme' }).getAttribute('aria-pressed'), 'true')
+    assert.equal(new URLSearchParams(new URL(restrictedPage.url()).hash.slice(1)).get('cmp'), 'M1,B2')
+    await restrictedPage.reload({ waitUntil: 'domcontentloaded' })
+    await restrictedPage.getByRole('combobox', { name: 'Second concern' }).waitFor()
+    assert.equal(await restrictedPage.locator('html').getAttribute('data-theme'), 'light', 'unsaved theme must not masquerade as persisted')
+    assert.deepEqual(storageErrors, [], 'Blocked storage must not crash the app at ' + width + 'px')
+    await restricted.close()
+    console.log('PASS real Chromium: blocked browser storage, theme keyboard toggle and deep-link at ' + width + 'px')
+  }
 } finally {
   if (browser) await browser.close()
   server.kill('SIGTERM')

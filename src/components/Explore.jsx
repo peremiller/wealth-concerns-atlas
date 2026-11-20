@@ -116,5 +116,5 @@ export default function Explore({ data, state, update, reset }) {
 }
 
 function FilterGroup({ title, children }) {
-  return <div className="fgroup"><h3>{title}</h3>{children}</div>
+  return <div className="fgroup" role="group" aria-label={title}><h3>{title}</h3>{children}</div>
 }
