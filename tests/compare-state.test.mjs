@@ -101,4 +101,7 @@ test('private browsing and disabled storage must not crash theme rendering', asy
   })
   assert.equal(loadTheme(blocked), 'light')
   assert.equal(saveTheme('light', blocked), false)
+  assert.equal(loadTheme(() => null), 'light')
+  assert.equal(saveTheme('dark', () => null), false, 'missing storage must not claim persistence')
+  assert.equal(saveTheme('light', () => ({})), false, 'storage without a setter cannot persist')
 })
