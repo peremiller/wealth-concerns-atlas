@@ -38,6 +38,7 @@ function SolRow({ s, q }) {
 
 export default function Explore({ data, state, update, reset }) {
   const [copied, setCopied] = useState(false)
+  const [shareFailed, setShareFailed] = useState(false)
   const results = useMemo(() => filterProblems(data, state), [data, state])
   const total = results.reduce((a, r) => a + r.n, 0)
 
@@ -46,8 +47,8 @@ export default function Explore({ data, state, update, reset }) {
   const toggleAll = () => update({ open: allOpen ? [] : results.map(r => r.p.id) })
 
   const share = async () => {
-    try { await navigator.clipboard.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 1600) }
-    catch { setCopied(false) }
+    try { await navigator.clipboard.writeText(window.location.href); setShareFailed(false); setCopied(true); setTimeout(() => setCopied(false), 1600) }
+    catch { setCopied(false); setShareFailed(true) }
   }
   const exportCsv = () => download('wealth-concerns-filtered.csv', toCSV(data, state))
 
@@ -79,6 +80,7 @@ export default function Explore({ data, state, update, reset }) {
           <button className="act" onClick={exportCsv}>⬇ Export CSV</button>
           <button className="act" onClick={() => window.print()}>🖨 Print</button>
         </div>
+        <div role="status" className="results-meta">{shareFailed ? 'Could not copy the link. Copy the address from your browser instead.' : ''}</div>
       </aside>
 
       <div>
