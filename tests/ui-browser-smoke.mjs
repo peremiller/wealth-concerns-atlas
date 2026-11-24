@@ -51,6 +51,21 @@ try {
       await page.getByRole('button', { name: 'Explore' }).hover()
       await page.getByRole('button', { name: 'Explore' }).click()
       assert.equal(new URLSearchParams(new URL(page.url()).hash.slice(1)).get('view'), 'explore')
+      // Clipboard denial must have visible, announced feedback without changing the view.
+      await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {
+        configurable: true, value: { writeText: async () => { throw new DOMException('Denied', 'NotAllowedError') } },
+      }))
+      const beforeShare = page.url()
+      await page.getByRole('button', { name: /Share view/ }).click()
+      const shareError = page.getByRole('status').filter({ hasText: 'Could not copy the link' })
+      await shareError.waitFor({ state: 'visible' })
+      assert.equal(page.url(), beforeShare)
+      await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {
+        configurable: true, value: { writeText: async () => {} },
+      }))
+      await page.getByRole('button', { name: /Share view/ }).click()
+      await page.getByRole('button', { name: /Link copied/ }).waitFor()
+      await shareError.waitFor({ state: 'hidden' })
       // Distinguish repeated filter labels by their actual accessible group.
       const priorityGroup = page.getByRole('group', { name: 'Priority' })
       const effortGroup = page.getByRole('group', { name: 'Effort' })
