@@ -74,3 +74,34 @@ test('light and dark theme tokens meet normal-text contrast for informative labe
     }
   }
 })
+
+test('theme persists its existing dark/light preference without changing unrelated storage', async () => {
+  const { loadTheme, saveTheme } = await import('../src/lib/themeStorage.js')
+  const map = new Map([['unrelated-record', 'preserve me']])
+  const storage = { getItem: key => map.get(key) ?? null, setItem: (key, value) => map.set(key, value) }
+  const provider = () => storage
+  assert.equal(loadTheme(provider), 'light')
+  assert.equal(saveTheme('dark', provider), true)
+  assert.equal(loadTheme(provider), 'dark')
+  assert.equal(saveTheme('light', provider), true)
+  assert.equal(loadTheme(provider), 'light')
+  assert.equal(map.get('unrelated-record'), 'preserve me')
+  map.set('wc-theme', 'unexpected')
+  assert.equal(loadTheme(provider), 'light', 'corrupt theme must not create an unknown UI color mode')
+})
+
+test('private browsing and disabled storage must not crash theme rendering', async () => {
+  const { loadTheme, saveTheme } = await import('../src/lib/themeStorage.js')
+  const denied = () => { throw new Error('storage access denied') }
+  assert.equal(loadTheme(denied), 'light')
+  assert.equal(saveTheme('dark', denied), false)
+  const blocked = () => ({
+    getItem: () => { throw new Error('read denied') },
+    setItem: () => { throw new Error('write denied') },
+  })
+  assert.equal(loadTheme(blocked), 'light')
+  assert.equal(saveTheme('light', blocked), false)
+  assert.equal(loadTheme(() => null), 'light')
+  assert.equal(saveTheme('dark', () => null), false, 'missing storage must not claim persistence')
+  assert.equal(saveTheme('light', () => ({})), false, 'storage without a setter cannot persist')
+})
